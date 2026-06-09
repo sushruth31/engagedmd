@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
-import { validateCard, type ValidationResponse } from './api';
+import { api } from './apiClient';
+import type { ValidationResponse } from './types';
 import { formatCardNumber } from './format';
 
 const DEBOUNCE_MS = 400;
@@ -14,14 +15,20 @@ const useValidation = (digits: string) => {
       setResult(null);
       return;
     }
+    let active = true;
     setLoading(true);
     const timer = setTimeout(() => {
-      validateCard(digits)
-        .then(setResult)
-        .catch(() => setResult({ valid: false, error: 'Could not reach the validation service.' }))
-        .finally(() => setLoading(false));
+      api.validateCard(digits)
+        .then((r) => { if (active) setResult(r); })
+        .catch((e: unknown) => {
+          if (active) setResult({ valid: false, error: e instanceof Error ? e.message : 'Validation failed.' });
+        })
+        .finally(() => { if (active) setLoading(false); });
     }, DEBOUNCE_MS);
-    return () => clearTimeout(timer);
+    return () => {
+      active = false;
+      clearTimeout(timer);
+    };
   }, [digits]);
 
   return { result, loading };
@@ -40,7 +47,7 @@ function Result({ digits, loading, result }: {
 
 export default function App() {
   const [value, setValue] = useState('');
-  const digits = value.replace(/\D/g, '');
+  const digits = value.replace(/\D/g, '').slice(0, 19);
   const { result, loading } = useValidation(digits);
 
   return (

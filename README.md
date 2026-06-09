@@ -1,112 +1,70 @@
 # Credit Card Validator
 
-A full-stack credit card validator that checks card numbers against the **Luhn checksum
-algorithm** on the backend and reports validity and card type in real time.
+Validates credit card numbers against the **Luhn checksum** on the backend, with live
+feedback and card-network detection on the frontend.
 
-## Tech Stack
+| Valid | Invalid |
+|-------|---------|
+| ![Valid card](screenshots/valid.png) | ![Invalid card](screenshots/invalid.png) |
 
-| Layer    | Tooling                                        |
-| -------- | ---------------------------------------------- |
-| Frontend | React 19, TypeScript, Vite                     |
-| Backend  | Node.js, Express 5, TypeScript                 |
-| Tests    | Vitest                                         |
-| Tooling  | npm workspaces (no extra monorepo tooling)     |
+## Stack
+
+React 19 · Vite · TypeScript (client) — Node · Express 5 · TypeScript (server) — axios —
+Vitest + Supertest — npm workspaces.
 
 ## Setup
 
-Requires Node.js ≥ 18.
+Node ≥ 18.
 
 ```bash
-git clone https://github.com/sushruth31/engagemd.git
-cd engagemd
-npm install      # installs both workspaces
-npm run dev      # API on :3001, UI on http://localhost:5173
+git clone https://github.com/sushruth31/engagedmd.git
+cd engagedmd
+npm install   # both workspaces
+npm run dev   # API :3001 · UI :5173
 ```
 
-The Vite dev server proxies `/api` to the backend, so the frontend uses relative URLs and
-there is no CORS friction during development.
-
-### Other scripts
-
-```bash
-npm run build    # type-check + build both packages
-npm test         # run the backend test suite
-```
+`npm run build` · `npm test` (25 tests across both packages).
 
 ## API
 
-### `POST /api/validate`
-
-**Request**
-
-```json
-{ "cardNumber": "4532 0151 1283 0366" }
-```
-
-Spaces and dashes are accepted — the server sanitizes the input before validating.
-
-**Response**
+`POST /api/validate` — body `{ "cardNumber": "4532 0151 1283 0366" }` (spaces/dashes accepted).
 
 ```json
 { "valid": true, "cardType": "Visa" }
-```
-
-When a number is rejected, the response includes a human-readable reason:
-
-```json
 { "valid": false, "error": "Card number failed the Luhn checksum." }
 ```
 
-| Field      | Type      | Notes                                                       |
-| ---------- | --------- | ----------------------------------------------------------- |
-| `valid`    | `boolean` | Whether the number passed every check.                      |
-| `cardType` | `string?` | `Visa` · `Mastercard` · `Amex` · `Discover` · `Unknown`.    |
-| `error`    | `string?` | Present only when `valid` is `false`.                       |
+`cardType`: Visa · Mastercard · Amex · Discover · Unknown. Liveness: `GET /health`.
 
-Validation runs in order: digits-only → length 13–19 → not all zeros → Luhn checksum.
+## Design
 
-## Design Decisions
+- **Validation is backend-only** — per spec, and the right call: client checks never gate trust.
+- **Luhn is a pure function**; sanitisation, structural rules, and card-type detection compose
+  it inside a `CardValidator` service — each piece unit-tested in isolation.
+- **One axios interceptor** normalizes every transport failure client-side; one Express
+  `errorHandler` does the same server-side. Centralized, not scattered.
+- **No database or auth** — intentionally out of scope, not overlooked.
 
-- **Validation lives on the backend.** The spec requires it, and it mirrors production
-  reality: client-side checks are a UX nicety, never a source of truth. The frontend only
-  displays the verdict the server returns.
-- **Luhn is a pure, dependency-free function.** `isValidLuhn` takes a digit string and
-  returns a boolean — no side effects, trivially testable, and droppable into any project.
-- **Checksum and business rules are separated.** `luhn.ts` answers only "does this satisfy
-  the checksum?"; `validate.ts` owns format, length, and all-zeros rules plus card-type
-  detection. This is why `isValidLuhn("0000…")` is `true` (it *does* satisfy Luhn) while the
-  API correctly rejects all-zeros — the concerns are distinct and tested separately.
-- **Real-time, debounced validation.** Results appear ~400 ms after typing stops — no submit
-  button, no wait-for-click. Better UX with one `useState`-driven hook and no state library.
-- **No database or authentication.** Intentionally excluded per the spec — there is no state
-  to persist and nothing to protect. Adding either would be scope creep, not robustness.
-- **Card-type detection was added.** ~12 lines of prefix matching delivers visible value the
-  brief didn't strictly require, without pulling in a dependency.
-- **npm workspaces, not monorepo tooling.** Two packages and a single `npm install` is the
-  right-sized choice; Nx/Turborepo would be ceremony for a two-package project.
-- **TypeScript strict everywhere, zero `any`.** Both packages compile under `strict` with
-  no unused locals or parameters.
+## Extending
 
-## Project Structure
+Built to grow without rework:
+
+- **New endpoint** → add a router, mount it in `app.ts`; CORS + error handling already apply.
+- **New validation rule** → one method in `CardValidator`.
+- **New card network** → one line in `cardType.ts`.
+- `buildApp()` is decoupled from startup, so the API is tested without binding a port
+  (`app.test.ts`, via Supertest).
+
+## Tests
+
+`npm test` — Luhn checksum, card-type detection, the validation pipeline, and the HTTP layer
+(`200 / 400 / 413 / malformed JSON / health`) via Supertest; plus frontend digit-formatting
+and interceptor error-mapping.
+
+## Structure
 
 ```
-credit-card-validator/
-├── client/                 # React + Vite frontend
-│   └── src/
-│       ├── App.tsx         # input + live result (single component, useState)
-│       ├── api.ts          # validateCard() — the entire API layer
-│       └── format.ts       # groups digits by fours while typing
-└── server/                 # Express API
-    └── src/
-        ├── index.ts        # one route: POST /api/validate
-        ├── luhn.ts         # pure Luhn checksum
-        ├── cardType.ts     # prefix-based card-network detection
-        ├── validate.ts     # sanitize + rules + checksum pipeline
-        └── *.test.ts       # Vitest coverage for the checksum and the pipeline
+client/src/  App.tsx · apiClient.ts (axios + interceptor) · format.ts · types.ts
+server/src/  index.ts (bootstrap) · app.ts (factory) · validateRoute.ts · errorHandler.ts
+             cardValidator.ts · luhn.ts · cardType.ts · types.ts
 ```
-
-## Testing
-
-The backend test suite (`npm test`) covers the Luhn checksum primitive and the full
-validation pipeline: valid numbers for each network, formatting with spaces/dashes, and
-every rejection path (non-numeric, empty, out-of-range length, all zeros, failed checksum).
