@@ -3,8 +3,8 @@
 Validates credit card numbers against the **Luhn checksum** on the backend, with live
 feedback and card-network detection on the frontend.
 
-| Valid | Invalid |
-|-------|---------|
+| Valid                                | Invalid                                  |
+| ------------------------------------ | ---------------------------------------- |
 | ![Valid card](screenshots/valid.png) | ![Invalid card](screenshots/invalid.png) |
 
 ## Stack

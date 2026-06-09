@@ -15,13 +15,12 @@ describe('CardValidator.validate — valid inputs', () => {
     expect(validate(number)).toEqual({ valid: true, cardType });
   });
 
-  it.each([
-    '4532 0151 1283 0366',
-    '4532-0151-1283-0366',
-    '  4532015112830366  ',
-  ])('sanitises then accepts %s', (number) => {
-    expect(validate(number).valid).toBe(true);
-  });
+  it.each(['4532 0151 1283 0366', '4532-0151-1283-0366', '  4532015112830366  '])(
+    'sanitises then accepts %s',
+    (number) => {
+      expect(validate(number).valid).toBe(true);
+    },
+  );
 });
 
 describe('CardValidator.validate — rejected inputs', () => {
@@ -37,9 +36,9 @@ describe('CardValidator.validate — rejected inputs', () => {
   });
 
   it('returns a descriptive error for each failure', () => {
-    expect(validate('abc').error).toMatch(/digits/);
-    expect(validate('123').error).toMatch(/13-19/);
-    expect(validate('0000000000000000').error).toMatch(/zero/);
-    expect(validate('4532015112830367').error).toMatch(/Luhn/);
+    expect(validate('abc').error).toMatch(/digits/); // message names the digits rule
+    expect(validate('123').error).toMatch(/13-19/); // message names the length range
+    expect(validate('0000000000000000').error).toMatch(/zero/); // message names the all-zeros rule
+    expect(validate('4532015112830367').error).toMatch(/Luhn/); // message names the Luhn rule
   });
 });

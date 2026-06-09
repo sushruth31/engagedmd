@@ -6,6 +6,7 @@ import App from './App';
 import { cardValidatorApi } from './api/cardValidator';
 import { ApiError } from './api/client';
 
+// Matches the input via its aria-label, case-insensitively.
 const input = () => screen.getByLabelText(/card number/i);
 
 describe('<App />', () => {
@@ -26,6 +27,7 @@ describe('<App />', () => {
     vi.spyOn(cardValidatorApi, 'validate').mockResolvedValue({ valid: true, cardType: 'Visa' });
     render(<App />);
     await userEvent.type(input(), '4532015112830366');
+    // Matches the rendered "✓ Valid · Visa" status.
     expect(await screen.findByText(/valid · visa/i)).toBeInTheDocument();
   });
 
@@ -36,6 +38,7 @@ describe('<App />', () => {
     });
     render(<App />);
     await userEvent.type(input(), '4532015112830367');
+    // Matches the rendered Luhn failure message.
     expect(await screen.findByText(/failed the luhn checksum/i)).toBeInTheDocument();
   });
 
@@ -45,6 +48,7 @@ describe('<App />', () => {
     );
     render(<App />);
     await userEvent.type(input(), '4532015112830366');
+    // Matches the rendered transport-error copy.
     expect(await screen.findByText(/service unavailable/i)).toBeInTheDocument();
   });
 
@@ -52,8 +56,10 @@ describe('<App />', () => {
     vi.spyOn(cardValidatorApi, 'validate').mockResolvedValue({ valid: true, cardType: 'Visa' });
     render(<App />);
     await userEvent.type(input(), '4532015112830366');
+    // Valid status appears (matches the rendered "✓ Valid · Visa")...
     expect(await screen.findByText(/valid · visa/i)).toBeInTheDocument();
     await userEvent.clear(input());
+    // ...then disappears once the field is cleared.
     await waitFor(() => expect(screen.queryByText(/valid · visa/i)).not.toBeInTheDocument());
   });
 });

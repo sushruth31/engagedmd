@@ -1,4 +1,6 @@
 import axios, { type AxiosInstance } from 'axios';
+import { API_CONFIG, ERROR_CODES, MESSAGES } from '../constants';
+import type { ErrorCode } from '@ccv/shared';
 
 /**
  * Normalised API failure. The interceptor converts every transport/HTTP error
@@ -8,7 +10,7 @@ export class ApiError extends Error {
   constructor(
     message: string,
     public readonly status?: number,
-    public readonly code?: string,
+    public readonly code?: ErrorCode,
   ) {
     super(message);
     this.name = 'ApiError';
@@ -17,7 +19,7 @@ export class ApiError extends Error {
 
 /** Minimal slice of an axios error — keeps `toApiError` pure and easy to test. */
 type RawError = {
-  response?: { status: number; data?: { error?: string; code?: string } };
+  response?: { status: number; data?: { error?: string; code?: ErrorCode } };
   request?: unknown;
 };
 
@@ -25,12 +27,12 @@ type RawError = {
 export const toApiError = (error: RawError): ApiError => {
   if (error.response) {
     const { status, data } = error.response;
-    return new ApiError(data?.error || 'Request failed.', status, data?.code);
+    return new ApiError(data?.error || MESSAGES.REQUEST_FAILED, status, data?.code);
   }
   if (error.request) {
-    return new ApiError('Service unavailable. Please try again.', 0, 'NETWORK_ERROR');
+    return new ApiError(MESSAGES.UNAVAILABLE, 0, ERROR_CODES.NETWORK);
   }
-  return new ApiError('An unexpected error occurred.', 0, 'UNKNOWN');
+  return new ApiError(MESSAGES.UNEXPECTED, 0, ERROR_CODES.UNKNOWN);
 };
 
 /**
@@ -41,11 +43,11 @@ export const toApiError = (error: RawError): ApiError => {
 export class ApiClient {
   private readonly http: AxiosInstance;
 
-  constructor(baseURL = import.meta.env.VITE_API_URL || 'http://localhost:3001/api') {
+  constructor(baseURL = API_CONFIG.BASE_URL) {
     this.http = axios.create({
       baseURL,
-      headers: { 'Content-Type': 'application/json' },
-      timeout: 5000,
+      headers: { 'Content-Type': API_CONFIG.CONTENT_TYPE },
+      timeout: API_CONFIG.TIMEOUT,
     });
     this.http.interceptors.response.use(
       (response) => response.data,

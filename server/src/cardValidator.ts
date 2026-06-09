@@ -1,5 +1,6 @@
 import { isValidLuhn } from './luhn.js';
 import { getCardType } from './cardType.js';
+import { CARD_LENGTH, ERRORS } from './constants.js';
 import type { ValidationResponse } from '@ccv/shared';
 
 /**
@@ -8,28 +9,28 @@ import type { ValidationResponse } from '@ccv/shared';
  * `isValidLuhn` and `getCardType` helpers behind one cohesive entry point.
  */
 export class CardValidator {
-  private static readonly MIN_LENGTH = 13;
-  private static readonly MAX_LENGTH = 19;
-
   validate(cardNumber: string): ValidationResponse {
     const digits = this.sanitize(cardNumber);
 
+    // One or more characters, all digits.
     if (!/^\d+$/.test(digits)) {
-      return this.invalid('Card number must contain only digits.');
+      return this.invalid(ERRORS.DIGITS_ONLY);
     }
-    if (digits.length < CardValidator.MIN_LENGTH || digits.length > CardValidator.MAX_LENGTH) {
-      return this.invalid(`Card number must be ${CardValidator.MIN_LENGTH}-${CardValidator.MAX_LENGTH} digits.`);
+    if (digits.length < CARD_LENGTH.MIN || digits.length > CARD_LENGTH.MAX) {
+      return this.invalid(ERRORS.LENGTH_RANGE(CARD_LENGTH.MIN, CARD_LENGTH.MAX));
     }
+    // Every character is a zero.
     if (/^0+$/.test(digits)) {
-      return this.invalid('Card number cannot be all zeros.');
+      return this.invalid(ERRORS.ALL_ZEROS);
     }
     if (!isValidLuhn(digits)) {
-      return this.invalid('Card number failed the Luhn checksum.');
+      return this.invalid(ERRORS.LUHN_FAILED);
     }
     return { valid: true, cardType: getCardType(digits) };
   }
 
   private sanitize(cardNumber: string): string {
+    // Remove spaces and dashes from common paste formats.
     return cardNumber.replace(/[\s-]/g, '');
   }
 

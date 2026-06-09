@@ -1,9 +1,8 @@
 import { useEffect, useState } from 'react';
 import { cardValidatorApi } from './api/cardValidator';
+import { UI, MESSAGES } from './constants';
 import type { ValidationResponse } from '@ccv/shared';
 import { formatCardNumber } from './format';
-
-const DEBOUNCE_MS = 400;
 
 /** Validates the card number on the backend, debounced as the user types. */
 const useValidation = (digits: string) => {
@@ -18,13 +17,23 @@ const useValidation = (digits: string) => {
     let active = true;
     setLoading(true);
     const timer = setTimeout(() => {
-      cardValidatorApi.validate(digits)
-        .then((r) => { if (active) setResult(r); })
-        .catch((e: unknown) => {
-          if (active) setResult({ valid: false, error: e instanceof Error ? e.message : 'Validation failed.' });
+      cardValidatorApi
+        .validate(digits)
+        .then((r) => {
+          if (active) setResult(r);
         })
-        .finally(() => { if (active) setLoading(false); });
-    }, DEBOUNCE_MS);
+        .catch((e: unknown) => {
+          if (active) {
+            setResult({
+              valid: false,
+              error: e instanceof Error ? e.message : MESSAGES.VALIDATION_FAILED,
+            });
+          }
+        })
+        .finally(() => {
+          if (active) setLoading(false);
+        });
+    }, UI.DEBOUNCE_MS);
     return () => {
       active = false;
       clearTimeout(timer);
@@ -34,7 +43,11 @@ const useValidation = (digits: string) => {
   return { result, loading };
 };
 
-function Result({ digits, loading, result }: {
+function Result({
+  digits,
+  loading,
+  result,
+}: {
   digits: string;
   loading: boolean;
   result: ValidationResponse | null;
@@ -47,7 +60,8 @@ function Result({ digits, loading, result }: {
 
 export default function App() {
   const [value, setValue] = useState('');
-  const digits = value.replace(/\D/g, '').slice(0, 19);
+  // Keep digits only, capped at the maximum card length.
+  const digits = value.replace(/\D/g, '').slice(0, UI.MAX_CARD_DIGITS);
   const { result, loading } = useValidation(digits);
 
   return (

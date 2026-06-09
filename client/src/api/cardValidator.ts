@@ -1,4 +1,5 @@
 import { apiClient } from './client';
+import { ENDPOINTS } from '../constants';
 import type { ValidationResponse } from '@ccv/shared';
 
 /**
@@ -7,5 +8,5 @@ import type { ValidationResponse } from '@ccv/shared';
  */
 export const cardValidatorApi = {
   validate: (cardNumber: string): Promise<ValidationResponse> =>
-    apiClient.post('/validate', { cardNumber }),
+    apiClient.post(ENDPOINTS.VALIDATE, { cardNumber }),
 };

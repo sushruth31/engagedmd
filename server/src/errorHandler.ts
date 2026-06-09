@@ -1,5 +1,6 @@
 import type { ErrorRequestHandler } from 'express';
 import { ValidationError } from './errors.js';
+import { ERROR_CODES, ERRORS } from './constants.js';
 
 /**
  * Central error middleware. Renders known ValidationErrors and body-parser
@@ -12,12 +13,15 @@ export const errorHandler: ErrorRequestHandler = (err, _req, res, _next) => {
     return;
   }
 
+  // body-parser failures (malformed JSON, payload too large) carry a 4xx status.
   const status = (err as { status?: number }).status;
   if (typeof status === 'number' && status >= 400 && status < 500) {
-    res.status(status).json({ valid: false, error: 'Invalid request body.', code: 'BAD_REQUEST' });
+    res
+      .status(status)
+      .json({ valid: false, error: ERRORS.INVALID_BODY, code: ERROR_CODES.BAD_REQUEST });
     return;
   }
 
   console.error('Unhandled error:', err);
-  res.status(500).json({ valid: false, error: 'Internal server error.', code: 'INTERNAL_ERROR' });
+  res.status(500).json({ valid: false, error: ERRORS.INTERNAL, code: ERROR_CODES.INTERNAL });
 };

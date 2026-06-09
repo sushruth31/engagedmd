@@ -18,7 +18,9 @@ describe('POST /api/validate', () => {
   });
 
   it('accepts a number formatted with spaces and dashes', async () => {
-    const res = await request(app).post('/api/validate').send({ cardNumber: '4532-0151-1283-0366' });
+    const res = await request(app)
+      .post('/api/validate')
+      .send({ cardNumber: '4532-0151-1283-0366' });
     expect(res.status).toBe(200);
     expect(res.body.valid).toBe(true);
   });
@@ -43,7 +45,9 @@ describe('POST /api/validate', () => {
   });
 
   it('rejects an oversized body with 413', async () => {
-    const res = await request(app).post('/api/validate').send({ cardNumber: '4'.repeat(2000) });
+    const res = await request(app)
+      .post('/api/validate')
+      .send({ cardNumber: '4'.repeat(2000) });
     expect(res.status).toBe(413);
   });
 });

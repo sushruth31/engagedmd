@@ -10,9 +10,17 @@ export interface ValidationRequest {
 
 export type CardType = 'Visa' | 'Mastercard' | 'Amex' | 'Discover' | 'Unknown';
 
+/** Machine-readable error codes shared across the stack. */
+export type ErrorCode =
+  | 'VALIDATION_ERROR'
+  | 'BAD_REQUEST'
+  | 'INTERNAL_ERROR'
+  | 'NETWORK_ERROR'
+  | 'UNKNOWN';
+
 export interface ValidationResponse {
   valid: boolean;
   cardType?: CardType;
   error?: string;
-  code?: string;
+  code?: ErrorCode;
 }
