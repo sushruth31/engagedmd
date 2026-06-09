@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
-import { api } from './apiClient';
-import type { ValidationResponse } from './types';
+import { cardValidatorApi } from './api/cardValidator';
+import type { ValidationResponse } from '@ccv/shared';
 import { formatCardNumber } from './format';
 
 const DEBOUNCE_MS = 400;
@@ -18,7 +18,7 @@ const useValidation = (digits: string) => {
     let active = true;
     setLoading(true);
     const timer = setTimeout(() => {
-      api.validateCard(digits)
+      cardValidatorApi.validate(digits)
         .then((r) => { if (active) setResult(r); })
         .catch((e: unknown) => {
           if (active) setResult({ valid: false, error: e instanceof Error ? e.message : 'Validation failed.' });

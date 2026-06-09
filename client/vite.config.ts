@@ -1,16 +1,13 @@
 import { defineConfig } from 'vitest/config';
 import react from '@vitejs/plugin-react';
 
-// Proxy /api to the backend so the frontend can call it with relative URLs in dev.
+// Client talks to the API by absolute URL (VITE_API_URL) with CORS, so there is
+// no dev proxy to keep in sync. Vitest runs components in jsdom.
 export default defineConfig({
   plugins: [react()],
-  server: {
-    proxy: {
-      '/api': 'http://localhost:3001',
-    },
-  },
   test: {
     globals: true,
-    environment: 'node',
+    environment: 'jsdom',
+    setupFiles: ['./src/test/setup.ts'],
   },
 });

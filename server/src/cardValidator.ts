@@ -1,6 +1,6 @@
 import { isValidLuhn } from './luhn.js';
 import { getCardType } from './cardType.js';
-import type { ValidationResponse } from './types.js';
+import type { ValidationResponse } from '@ccv/shared';
 
 /**
  * Validates credit card numbers: input sanitisation, structural rules

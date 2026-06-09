@@ -1,4 +1,4 @@
-import type { CardType } from './types.js';
+import type { CardType } from '@ccv/shared';
 
 /**
  * Detects the card network from a digits-only number by its leading digits,

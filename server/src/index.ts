@@ -1,7 +1,6 @@
 import { buildApp } from './app.js';
+import { config } from './config.js';
 
-const PORT = Number(process.env.PORT) || 3001;
-
-buildApp().listen(PORT, () => {
-  process.stdout.write(`Credit Card Validator API listening on http://localhost:${PORT}\n`);
+buildApp().listen(config.port, () => {
+  process.stdout.write(`Credit Card Validator API listening on http://localhost:${config.port}\n`);
 });

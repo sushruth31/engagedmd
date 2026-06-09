@@ -17,8 +17,20 @@ describe('POST /api/validate', () => {
     expect(res.body).toMatchObject({ valid: false });
   });
 
+  it('accepts a number formatted with spaces and dashes', async () => {
+    const res = await request(app).post('/api/validate').send({ cardNumber: '4532-0151-1283-0366' });
+    expect(res.status).toBe(200);
+    expect(res.body.valid).toBe(true);
+  });
+
   it('rejects a missing cardNumber field with 400', async () => {
     const res = await request(app).post('/api/validate').send({});
+    expect(res.status).toBe(400);
+    expect(res.body).toMatchObject({ valid: false, code: 'VALIDATION_ERROR' });
+  });
+
+  it('rejects a non-string cardNumber with 400', async () => {
+    const res = await request(app).post('/api/validate').send({ cardNumber: 12345 });
     expect(res.status).toBe(400);
   });
 
