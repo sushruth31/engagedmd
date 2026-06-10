@@ -23,7 +23,7 @@ npm install
 npm run dev   # API :3001 · UI :5173
 ```
 
-`npm run build` · `npm test` (17 tests). Env config: `PORT`, `CORS_ORIGIN`, `VITE_API_URL`.
+`npm run build` · `npm test` (18 tests). Env config: `PORT`, `CORS_ORIGIN`, `VITE_API_URL`.
 
 ## API
 

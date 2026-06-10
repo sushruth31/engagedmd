@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { AxiosError } from 'axios';
 import { cardValidatorApi } from './api/cardValidator';
 import { UI, MESSAGES } from './constants';
 import type { ValidationResponse } from '@ccv/shared';
@@ -22,8 +23,18 @@ const useValidation = (digits: string) => {
         .then((r) => {
           if (active) setResult(r);
         })
-        .catch(() => {
-          if (active) setResult({ valid: false, error: MESSAGES.UNAVAILABLE });
+        .catch((e: unknown) => {
+          if (!active) return;
+          // 4xx/5xx: the request completed and the API answered with its own
+          // error envelope — show that reason. Anything without a usable
+          // response (network down, timeout) gets the generic fallback.
+          const body =
+            e instanceof AxiosError
+              ? (e.response?.data as ValidationResponse | undefined)
+              : undefined;
+          setResult(
+            typeof body?.error === 'string' ? body : { valid: false, error: MESSAGES.UNAVAILABLE },
+          );
         })
         .finally(() => {
           if (active) setLoading(false);

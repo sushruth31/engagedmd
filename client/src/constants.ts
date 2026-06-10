@@ -17,7 +17,10 @@ export const UI = {
   DIGIT_GROUP_SIZE: 4,
 } as const;
 
-/** Shown when a request never reaches the API (network or server failure). */
+/**
+ * Fallback for requests that never complete (network down, timeout). When the
+ * API does respond — even with a 4xx/5xx — its envelope supplies the message.
+ */
 export const MESSAGES = {
   UNAVAILABLE: 'Could not reach the validation service.',
 } as const;

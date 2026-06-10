@@ -2,6 +2,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import { AxiosError, type AxiosResponse } from 'axios';
 import App from './App';
 import { cardValidatorApi } from './api/cardValidator';
 
@@ -30,11 +31,28 @@ describe('<App />', () => {
     expect(await screen.findByText(/failed the luhn checksum/i)).toBeInTheDocument();
   });
 
-  it('shows a fallback message when the request fails', async () => {
+  it("shows the API's own reason when it rejects with an error envelope", async () => {
+    const response = { status: 400, data: { valid: false, error: 'Invalid request body.' } };
+    vi.spyOn(cardValidatorApi, 'validate').mockRejectedValue(
+      new AxiosError(
+        'Bad Request',
+        'ERR_BAD_REQUEST',
+        undefined,
+        undefined,
+        response as AxiosResponse,
+      ),
+    );
+    render(<App />);
+    await userEvent.type(input(), '4532015112830366');
+    // The request completed — the server's reason is shown, not the fallback.
+    expect(await screen.findByText(/invalid request body/i)).toBeInTheDocument();
+  });
+
+  it('shows the fallback when the request never completes', async () => {
     vi.spyOn(cardValidatorApi, 'validate').mockRejectedValue(new Error('network down'));
     render(<App />);
     await userEvent.type(input(), '4532015112830366');
-    // Any transport failure surfaces the same friendly fallback.
+    // No response at all (network down, timeout) → generic fallback.
     expect(await screen.findByText(/could not reach/i)).toBeInTheDocument();
   });
 });
