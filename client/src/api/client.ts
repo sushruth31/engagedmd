@@ -36,9 +36,10 @@ export const toApiError = (error: RawError): ApiError => {
 };
 
 /**
- * Centralized API client over one axios instance. The response interceptor
- * unwraps `data` and normalizes every failure to an ApiError, so each method
- * added here inherits consistent behaviour with zero per-call boilerplate.
+ * Base HTTP client. Owns one configured axios instance whose response
+ * interceptor unwraps `data` and normalizes failures to an ApiError. Domain
+ * services extend this and call the protected verbs, so every request inherits
+ * the same transport handling.
  */
 export class ApiClient {
   private readonly http: AxiosInstance;
@@ -55,9 +56,7 @@ export class ApiClient {
     );
   }
 
-  post<T>(url: string, data?: unknown): Promise<T> {
+  protected post<T>(url: string, data?: unknown): Promise<T> {
     return this.http.post<T, T>(url, data);
   }
 }
-
-export const apiClient = new ApiClient();

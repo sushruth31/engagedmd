@@ -6,7 +6,7 @@
  * of 10.
  *
  * Pure and dependency-free. Expects digits only — sanitisation and the
- * length / all-zeros business rules live upstream in `validate.ts`.
+ * length / all-zeros business rules live upstream in `cardValidator.ts`.
  */
 export const isValidLuhn = (digits: string): boolean => {
   if (!digits) return false;

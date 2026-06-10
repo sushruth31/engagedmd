@@ -1,12 +1,15 @@
-import { apiClient } from './client';
+import { ApiClient } from './client';
 import { ENDPOINTS } from '../constants';
 import type { ValidationResponse } from '@ccv/shared';
 
 /**
- * Card-validation API methods. Thin wrappers — business logic lives on the
- * server. Adding endpoints (tokenize, BIN lookup, batch) is a one-liner here.
+ * Card-validation API. Extends the base client to inherit its configured axios
+ * instance and centralized error handling; each endpoint is one method.
  */
-export const cardValidatorApi = {
-  validate: (cardNumber: string): Promise<ValidationResponse> =>
-    apiClient.post(ENDPOINTS.VALIDATE, { cardNumber }),
-};
+export class CardValidatorApi extends ApiClient {
+  validate(cardNumber: string): Promise<ValidationResponse> {
+    return this.post(ENDPOINTS.VALIDATE, { cardNumber });
+  }
+}
+
+export const cardValidatorApi = new CardValidatorApi();
