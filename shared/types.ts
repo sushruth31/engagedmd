@@ -4,10 +4,6 @@
  * both sides rather than a runtime surprise.
  */
 
-export interface ValidationRequest {
-  cardNumber: string;
-}
-
 export type CardType = 'Visa' | 'Mastercard' | 'Amex' | 'Discover' | 'Unknown';
 
 /** Machine-readable error codes shared across the stack. */

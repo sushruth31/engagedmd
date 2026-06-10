@@ -23,7 +23,7 @@ npm install   # all three workspaces
 npm run dev   # API :3001 · UI :5173
 ```
 
-`npm run build` · `npm test` (47 tests across both packages). Config via env, with sensible
+`npm run build` · `npm test` (19 tests across both packages). Config via env, with sensible
 defaults: `PORT`, `CORS_ORIGIN` (server) · `VITE_API_URL` (client).
 
 ## API
@@ -63,12 +63,12 @@ Built to grow without rework:
 
 ## Tests
 
-`npm test` (47):
+`npm test` (19):
 
-- **Backend** (Vitest + Supertest) — Luhn checksum, card-type detection, the validation
-  pipeline (full edge matrix), and the HTTP layer: `200 / 400 / 413 / malformed JSON / health`.
-- **Frontend** (Vitest + Testing Library) — component behaviour (valid, invalid, network
-  failure, live formatting, clearing) and the interceptor's error mapping.
+- **Backend** (Vitest + Supertest) — the Luhn checksum, the validation pipeline (networks,
+  sanitization, every rejection rule), and the HTTP layer: `200 / 400 / malformed JSON / 413`.
+- **Frontend** (Vitest + Testing Library) — component behaviour (valid, invalid, service
+  unreachable) and the interceptor's error mapping.
 
 ## Structure
 

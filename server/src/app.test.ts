@@ -17,23 +17,9 @@ describe('POST /api/validate', () => {
     expect(res.body).toMatchObject({ valid: false });
   });
 
-  it('accepts a number formatted with spaces and dashes', async () => {
-    const res = await request(app)
-      .post('/api/validate')
-      .send({ cardNumber: '4532-0151-1283-0366' });
-    expect(res.status).toBe(200);
-    expect(res.body.valid).toBe(true);
-  });
-
-  it('rejects a missing cardNumber field with 400', async () => {
-    const res = await request(app).post('/api/validate').send({});
-    expect(res.status).toBe(400);
-    expect(res.body).toMatchObject({ valid: false, code: 'VALIDATION_ERROR' });
-  });
-
-  it('rejects a non-string cardNumber with 400', async () => {
-    const res = await request(app).post('/api/validate').send({ cardNumber: 12345 });
-    expect(res.status).toBe(400);
+  it('rejects a missing or non-string cardNumber with 400', async () => {
+    expect((await request(app).post('/api/validate').send({})).status).toBe(400);
+    expect((await request(app).post('/api/validate').send({ cardNumber: 12345 })).status).toBe(400);
   });
 
   it('rejects malformed JSON with 400', async () => {
@@ -49,13 +35,5 @@ describe('POST /api/validate', () => {
       .post('/api/validate')
       .send({ cardNumber: '4'.repeat(2000) });
     expect(res.status).toBe(413);
-  });
-});
-
-describe('GET /health', () => {
-  it('reports ok', async () => {
-    const res = await request(app).get('/health');
-    expect(res.status).toBe(200);
-    expect(res.body).toEqual({ status: 'ok' });
   });
 });

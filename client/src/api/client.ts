@@ -58,10 +58,6 @@ export class ApiClient {
   post<T>(url: string, data?: unknown): Promise<T> {
     return this.http.post<T, T>(url, data);
   }
-
-  get<T>(url: string): Promise<T> {
-    return this.http.get<T, T>(url);
-  }
 }
 
 export const apiClient = new ApiClient();
