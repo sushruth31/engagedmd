@@ -24,7 +24,7 @@ export const ERRORS = {
   CARD_REQUIRED: 'Card number is required and must be a string.',
   CARD_EMPTY: 'Card number cannot be empty.',
   DIGITS_ONLY: 'Card number must contain only digits.',
-  LENGTH_RANGE: (min: number, max: number) => `Card number must be ${min}-${max} digits.`,
+  LENGTH_RANGE: `Card number must be ${CARD_LENGTH.MIN}-${CARD_LENGTH.MAX} digits.`,
   ALL_ZEROS: 'Card number cannot be all zeros.',
   LUHN_FAILED: 'Card number failed the Luhn checksum.',
   INVALID_BODY: 'Invalid request body.',

@@ -17,7 +17,7 @@ export class CardValidator {
       return this.invalid(ERRORS.DIGITS_ONLY);
     }
     if (digits.length < CARD_LENGTH.MIN || digits.length > CARD_LENGTH.MAX) {
-      return this.invalid(ERRORS.LENGTH_RANGE(CARD_LENGTH.MIN, CARD_LENGTH.MAX));
+      return this.invalid(ERRORS.LENGTH_RANGE);
     }
     // Every character is a zero.
     if (/^0+$/.test(digits)) {

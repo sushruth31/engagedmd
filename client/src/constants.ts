@@ -1,5 +1,3 @@
-import type { ErrorCode } from '@ccv/shared';
-
 /** API client configuration. Base URL is env-overridable for deployment. */
 export const API_CONFIG = {
   BASE_URL: import.meta.env.VITE_API_URL || 'http://localhost:3001/api',
@@ -19,16 +17,7 @@ export const UI = {
   DIGIT_GROUP_SIZE: 4,
 } as const;
 
-/** Client-owned error messages (the server owns validation copy). */
+/** Shown when a request never reaches the API (network or server failure). */
 export const MESSAGES = {
-  REQUEST_FAILED: 'Request failed.',
-  UNAVAILABLE: 'Service unavailable. Please try again.',
-  UNEXPECTED: 'An unexpected error occurred.',
-  VALIDATION_FAILED: 'Validation failed.',
+  UNAVAILABLE: 'Could not reach the validation service.',
 } as const;
-
-/** Transport-failure codes surfaced from the interceptor. */
-export const ERROR_CODES = {
-  NETWORK: 'NETWORK_ERROR',
-  UNKNOWN: 'UNKNOWN',
-} as const satisfies Record<string, ErrorCode>;

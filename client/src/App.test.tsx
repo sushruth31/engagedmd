@@ -4,7 +4,6 @@ import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import App from './App';
 import { cardValidatorApi } from './api/cardValidator';
-import { ApiError } from './api/client';
 
 // Finds the card-number input by its aria-label, case-insensitively.
 const input = () => screen.getByLabelText(/card number/i);
@@ -31,13 +30,11 @@ describe('<App />', () => {
     expect(await screen.findByText(/failed the luhn checksum/i)).toBeInTheDocument();
   });
 
-  it('surfaces a friendly message when the service is unreachable', async () => {
-    vi.spyOn(cardValidatorApi, 'validate').mockRejectedValue(
-      new ApiError('Service unavailable. Please try again.', 0, 'NETWORK_ERROR'),
-    );
+  it('shows a fallback message when the request fails', async () => {
+    vi.spyOn(cardValidatorApi, 'validate').mockRejectedValue(new Error('network down'));
     render(<App />);
     await userEvent.type(input(), '4532015112830366');
-    // Matches the rendered transport-error copy.
-    expect(await screen.findByText(/service unavailable/i)).toBeInTheDocument();
+    // Any transport failure surfaces the same friendly fallback.
+    expect(await screen.findByText(/could not reach/i)).toBeInTheDocument();
   });
 });

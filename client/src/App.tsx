@@ -22,13 +22,8 @@ const useValidation = (digits: string) => {
         .then((r) => {
           if (active) setResult(r);
         })
-        .catch((e: unknown) => {
-          if (active) {
-            setResult({
-              valid: false,
-              error: e instanceof Error ? e.message : MESSAGES.VALIDATION_FAILED,
-            });
-          }
+        .catch(() => {
+          if (active) setResult({ valid: false, error: MESSAGES.UNAVAILABLE });
         })
         .finally(() => {
           if (active) setLoading(false);
