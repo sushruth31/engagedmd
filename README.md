@@ -17,8 +17,8 @@ Vitest · Supertest · Testing Library — npm workspaces with a shared types pa
 Node ≥ 18.
 
 ```bash
-git clone https://github.com/sushruth31/engagedmd.git
-cd engagedmd
+git clone https://github.com/sushruth31/credit-card-validator.git
+cd credit-card-validator
 npm install   # all three workspaces
 npm run dev   # API :3001 · UI :5173
 ```
